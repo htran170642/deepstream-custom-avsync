@@ -1,0 +1,70 @@
+*****************************************************************************
+* Copyright (c) 2021-2023 NVIDIA Corporation.  All rights reserved.
+*
+* NVIDIA Corporation and its licensors retain all intellectual property
+* and proprietary rights in and to this software, related documentation
+* and any modifications thereto.  Any use, reproduction, disclosure or
+* distribution of this software and related documentation without an express
+* license agreement from NVIDIA Corporation is strictly prohibited.
+*****************************************************************************
+
+*****************************************************************************
+                     deepstream-avsync-app
+                             README
+*****************************************************************************
+
+1. Prerequisites:
+
+A. Please follow instructions in the apps/sample_apps/deepstream-app/README on how
+   to install the prerequisites for the Deepstream SDK, the DeepStream SDK itself,
+   and the apps.
+
+   You must have the following development packages installed
+   GStreamer-1.0
+   GStreamer-1.0 Base Plugins
+   GStreamer-1.0 gstrtspserver
+   X11 client-side library
+
+   To install these packages, execute the following command:
+   sudo apt-get install libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev \
+   libgstrtspserver-1.0-dev libx11-dev
+
+B. deepstream-6.4
+
+2. Purpose:
+
+This document describes the sample deepstream-avsync application with no Nvdsasr.
+
+This sample builds on top of the deepstream-test3 sample to demonstrate how to:
+
+* Use a uridecodebin3 so that any type of input (e.g. RTSP/File), any GStreamer
+  supported container format, and any codec can be used as input.
+* Process multiple Audio and video sources in the pipeline.
+* For video pipeline, for batch processing, configure the stream-muxer to generate a batch of frames.
+  Attach appropriate timestamp to outgoing gst buffer.
+* Decode audio data from individual sources and mix it using audio mixer element.
+* Send output of audio mixer and nvmultistreamtiler via rtsp or rtmp.
+
+3. To compile:
+```bash
+  $ Set CUDA_VER in the MakeFile as per platform.
+      For x86, CUDA_VER=12.2
+  $ sudo make (sudo not required in case of docker containers)
+```
+
+4. Usage:
+
+```bash
+  $ ./deepstream-avsync-app <uri1> [uri2] ... [uriN] <flag to indicate to stream via RTSP or RTMP  1:RTSP  0:RTMP>
+      <RTMP server url :applicable only for RTMP, for RTSP specify port number> enc-type <0:Hardware encoder 1:Software encoder>
+e.g.
+  For RTSP output:
+  $ ./deepstream-avsync-app file:///home/ubuntu/video1.mp4 file:///home/ubuntu/video2.mp4 1 8554 enc-type 0
+  $ ./deepstream-avsync-app rtsp://127.0.0.1/video1 rtsp://127.0.0.1/video2 1 8554 enc-type 0
+  (For Platforms where hardware encoder is not present)
+  $ ./deepstream-avsync-app rtsp://127.0.0.1/video1 rtsp://127.0.0.1/video2 1 8554 enc-type 1
+```
+
+### export pipeline image
+export GST_DEBUG_DUMP_DOT_DIR=<directory>
+dot -Tpng  <file.dot> >> pipeline.png
